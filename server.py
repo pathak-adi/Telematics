@@ -30,7 +30,6 @@ def handle_client(connection, address):
         print(msg)
         msg=str(msg)
 
-
         if msg == DISCONNECT_MESSAGE:
             connected = False
             print('disconnecting')
