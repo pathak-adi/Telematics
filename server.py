@@ -4,7 +4,7 @@ import requests
 import json
 
 HEADER = 64
-PORT = 80
+PORT = 5050
 SERVER = socket.gethostbyname(socket.gethostname())
 FORMAT = 'utf-8'
 ADDR = (SERVER, PORT)
