@@ -16,8 +16,8 @@ server.bind(ADDR)
 def handle_client(connection, address):
     print(f" New Connection: {address} has connected")
     connected = True
-    msg = connection.recv(200).decode(FORMAT)
-
+    msg = connection.recv(1024).decode(FORMAT)
+    print(msg)
     device_imei = bytes.fromhex(msg[4:])
     send_init(device_imei)
     print(f"f [{address, PORT}]: {device_imei}")
