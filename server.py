@@ -19,8 +19,12 @@ def handle_client(connection, address):
     msg = connection.recv(200).decode(FORMAT)
 
     device_imei = bytes.fromhex(msg[4:])
+
     print(f"f [{address, PORT}]: {device_imei}")
-    connection.send(b'0x01')
+    # connection.send(b'0x01')
+    ba=bytearray()
+    ba.append(1)
+    connection.send(ba)
     while connected:
         msg = connection.recv(1024).decode(FORMAT)
         msg=str(msg)
@@ -82,6 +86,19 @@ def parse_avl_packet(data):
 
 def send_data(data):
     url=f'https://z92bvmqd7b.execute-api.us-east-1.amazonaws.com/staging/impact_metrics/create'
+    qs = requests.post(url,json.dumps(data))
+    # Add sorting by date
+    print(qs.json())
+    return 0
+def send_init(data):
+    url=f'https://z92bvmqd7b.execute-api.us-east-1.amazonaws.com/staging/impact_metrics/create'
+    item={
+         'city':data,
+        'operating_mileage':'none',
+        'co2_mitigated': 'none',
+        'diesel_avoided': 'none',
+        'passengers_carried': 'none',
+    }
     qs = requests.post(url,json.dumps(data))
     # Add sorting by date
     print(qs.json())
