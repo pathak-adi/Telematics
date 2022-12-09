@@ -19,7 +19,7 @@ def handle_client(connection, address):
     msg = connection.recv(200).decode(FORMAT)
 
     device_imei = bytes.fromhex(msg[4:])
-
+    send_init(device_imei)
     print(f"f [{address, PORT}]: {device_imei}")
     # connection.send(b'0x01')
     ba=bytearray()
