@@ -18,15 +18,16 @@ def handle_client(connection, address):
     connected = True
     msg = connection.recv(1024).decode(FORMAT)
     print(msg)
-    device_imei = bytes.fromhex(msg[4:])
+    device_imei = msg #bytes.fromhex(msg[4:])
     send_init(device_imei)
     print(f"f [{address, PORT}]: {device_imei}")
-    # connection.send(b'0x01')
-    ba=bytearray()
-    ba.append(1)
-    connection.send(ba)
+    connection.send(b'0x01')
+    # ba=bytearray()
+    # ba.append(1)
+    # connection.send(ba)
     while connected:
         msg = connection.recv(1024).decode(FORMAT)
+        print(msg)
         msg=str(msg)
 
 
