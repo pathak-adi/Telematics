@@ -75,12 +75,12 @@ def parse_avl_packet(data):
         if lon >= 2 ** 32:
             lon = lon - 2 ** 32
         gps = {
-            "longitude": lon/10000000,
-            "latitude": lat/10000000,
-            "altitude": int(data[54:58], 16),
-            "angle": int(data[58:62],16),
-            "satellites": int(data[62:64],16),
-            "gps_speed": speed
+            "longitude": str(lon/10000000),
+            "latitude": str(lat/10000000),
+            "altitude": str(int(data[54:58], 16)),
+            "angle": str(int(data[58:62],16)),
+            "satellites": str(int(data[62:64],16)),
+            "gps_speed": str(speed)
         }
     except:
         gps = {
@@ -109,7 +109,7 @@ def parse_avl_packet(data):
     item = {
         'city': time_stamp,
         'operating_mileage': gps,
-        'co2_mitigated': speed,
+        'co2_mitigated': str(speed),
         'diesel_avoided': data,
         'passengers_carried': f'{lat} | {lon}',
     }
