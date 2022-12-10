@@ -33,7 +33,7 @@ def handle_client(connection, address):
     # connection.send(ba)
     while connected:
         msg = connection.recv(1024).hex()
-        if len(msg)>0:
+        if len(msg) > 0:
             # msg = connection.recv(1024).decode(FORMAT)
             print(msg)
             msg = str(msg)
@@ -71,16 +71,16 @@ def parse_avl_packet(data):
         speed = int(data[64:68], 16)
         lon = int(data[38:46], 16)
         lat = int(data[46:54], 16)
-        if lat >= 90000000:
+        if lat >= 850000000:
             lat = lat - 2 ** 32
-        if lon >= 180000000:
+        if lon >= 1800000000:
             lon = lon - 2 ** 32
         gps = {
-            "longitude": str(lon/10000000),
-            "latitude": str(lat/10000000),
+            "longitude": str(lon / 10000000),
+            "latitude": str(lat / 10000000),
             "altitude": str(int(data[54:58], 16)),
-            "angle": str(int(data[58:62],16)),
-            "satellites": str(int(data[62:64],16)),
+            "angle": str(int(data[58:62], 16)),
+            "satellites": str(int(data[62:64], 16)),
             "gps_speed": str(speed)
         }
     except:
@@ -92,7 +92,7 @@ def parse_avl_packet(data):
             "satellites": data[62:64],
             "gps_speed": data[64:68]
         }
-        lat,lon = 0,0
+        lat, lon = 0, 0
         speed = 0
 
     print(f'zero_bytes {zero_bytes}')
@@ -112,7 +112,7 @@ def parse_avl_packet(data):
         'operating_mileage': gps,
         'co2_mitigated': str(speed),
         'diesel_avoided': data,
-        'passengers_carried': f'{lat} | {lon}',
+        'passengers_carried': f'{lat/1000} | {lon/1000}',
     }
     send_data(item)
     return '000000' + num_records
