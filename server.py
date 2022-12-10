@@ -83,7 +83,7 @@ def parse_avl_packet(data):
     print(f'gps {gps}')
     try:
         t = int(time_stamp, 16)
-        time_stamp = datetime.utcfromtimestamp(t).strftime('%Y-%m-%d %H:%M:%S')
+        time_stamp = datetime.utcfromtimestamp(t/1000).strftime('%Y-%m-%d %H:%M:%S')
     except:
         pass
 
