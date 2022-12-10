@@ -70,9 +70,9 @@ def parse_avl_packet(data):
         speed = int(data[64:68], 16)
         lon = int(data[38:46], 16)
         lat = int(data[46:54], 16)
-        if lat >= 2 ** 32:
+        if lat >= 90000000:
             lat = lat - 2 ** 32
-        if lon >= 2 ** 32:
+        if lon >= 180000000:
             lon = lon - 2 ** 32
         gps = {
             "longitude": str(lon/10000000),
