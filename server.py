@@ -88,7 +88,7 @@ def parse_avl_packet(data):
         'passengers_carried': priority,
     }
     send_data(item)
-    return b'00' + bytes(num_records, 'utf-8')
+    return b'00'
 
 
 def send_data(data):
