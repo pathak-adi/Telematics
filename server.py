@@ -31,7 +31,8 @@ def handle_client(connection, address):
     connection.send(bytes.fromhex('01'))
     # connection.send(ba)
     while connected:
-        msg = connection.recv(1024).decode(FORMAT)
+        msg = connection.recv(1024)
+        # msg = connection.recv(1024).decode(FORMAT)
         print(msg)
         msg = str(msg)
 
@@ -43,7 +44,7 @@ def handle_client(connection, address):
             print(f"{address} {msg}")
             response = parse_avl_packet(msg)
             print(response)
-            connection.send(response)
+            connection.send(bytes.fromhex('01'))
     connection.close()
 
 
