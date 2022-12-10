@@ -109,7 +109,7 @@ def send_init(data):
         'diesel_avoided': 'none',
         'passengers_carried': 'none',
     }
-    qs = requests.post(url, json.dumps(data))
+    qs = requests.post(url, json.dumps(item))
     # Add sorting by date
     print(qs.json())
     return 0
