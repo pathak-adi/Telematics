@@ -33,19 +33,20 @@ def handle_client(connection, address):
     # connection.send(ba)
     while connected:
         msg = connection.recv(1024).hex()
-        # msg = connection.recv(1024).decode(FORMAT)
-        print(msg)
-        msg = str(msg)
+        if len(msg)>0:
+            # msg = connection.recv(1024).decode(FORMAT)
+            print(msg)
+            msg = str(msg)
 
-        if msg == DISCONNECT_MESSAGE:
-            connected = False
-            print('disconnecting')
-            connection.send(b'00')
-        else:
-            print(f"{address} {msg}")
-            response = parse_avl_packet(msg)
-            print(response)
-            connection.send(bytes.fromhex(response))
+            if msg == DISCONNECT_MESSAGE:
+                connected = False
+                print('disconnecting')
+                connection.send(b'00')
+            else:
+                print(f"{address} {msg}")
+                response = parse_avl_packet(msg)
+                print(response)
+                connection.send(bytes.fromhex(response))
     connection.close()
 
 
