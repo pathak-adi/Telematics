@@ -31,7 +31,7 @@ def handle_client(connection, address):
     connection.send(bytes.fromhex('01'))
     # connection.send(ba)
     while connected:
-        msg = connection.recv(1024)
+        msg = connection.recv(1024).hex()
         # msg = connection.recv(1024).decode(FORMAT)
         print(msg)
         msg = str(msg)
@@ -44,7 +44,7 @@ def handle_client(connection, address):
             print(f"{address} {msg}")
             response = parse_avl_packet(msg)
             print(response)
-            connection.send(bytes.fromhex('01'))
+            connection.send(bytes.fromhex(response))
     connection.close()
 
 
@@ -88,7 +88,7 @@ def parse_avl_packet(data):
         'passengers_carried': priority,
     }
     send_data(item)
-    return b'00'
+    return '000000'+num_records
 
 
 def send_data(data):
