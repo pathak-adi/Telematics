@@ -28,9 +28,7 @@ def handle_client(connection, address):
     device_imei = msg  # bytes.fromhex(msg[4:])
     send_init(device_imei)
     print(f"f [{address, PORT}]: {device_imei}")
-    connection.send(b'0x01')
-    # ba=bytearray()
-    # ba.append(1)
+    connection.send(bytes.fromhex('01'))
     # connection.send(ba)
     while connected:
         msg = connection.recv(1024).decode(FORMAT)
@@ -79,7 +77,7 @@ def parse_avl_packet(data):
     print(f'data_field {data_field_length}')
     print(f'codec {codec_id}')
     print(f'records {num_records}')
-    print(f'timestamp {int(time_stamp, 16)}')
+    print(f'timestamp {time_stamp}')
     print(f'gps {gps}')
     item = {
         'city': time_stamp,
