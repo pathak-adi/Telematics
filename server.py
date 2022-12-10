@@ -66,14 +66,33 @@ def parse_avl_packet(data):
     num_records = data[18:20]
     time_stamp = data[20:36]
     priority = data[36:38]
-    gps = {
-        "longitude": data[38:46],
-        "latitude": data[46:54],
-        "altitude": data[54:58],
-        "angle": data[58:62],
-        "satellites": data[62:64],
-        "gps_speed": data[64:68]
-    }
+    try:
+        speed = int(data[64:68], 16)
+        lon = int(data[38:46], 16)
+        lat = int(data[46:54], 16)
+        if lat >= 2 ** 32:
+            lat = lat - 2 ** 32
+        if lon >= 2 ** 32:
+            lon = lon - 2 ** 32
+        gps = {
+            "longitude": lon/10000000,
+            "latitude": lat/10000000,
+            "altitude": int(data[54:58], 16),
+            "angle": int(data[58:62],16),
+            "satellites": int(data[62:64],16),
+            "gps_speed": speed
+        }
+    except:
+        gps = {
+            "longitude": data[38:46],
+            "latitude": data[46:54],
+            "altitude": data[54:58],
+            "angle": data[58:62],
+            "satellites": data[62:64],
+            "gps_speed": data[64:68]
+        }
+        lat,lon = 0,0
+        speed = 0
 
     print(f'zero_bytes {zero_bytes}')
     print(f'data_field {data_field_length}')
@@ -83,16 +102,16 @@ def parse_avl_packet(data):
     print(f'gps {gps}')
     try:
         t = int(time_stamp, 16)
-        time_stamp = datetime.utcfromtimestamp(t/1000).strftime('%Y-%m-%d %H:%M:%S')
+        time_stamp = datetime.utcfromtimestamp(t / 1000).strftime('%Y-%m-%d %H:%M:%S')
     except:
         pass
 
     item = {
         'city': time_stamp,
         'operating_mileage': gps,
-        'co2_mitigated': data_field_length,
+        'co2_mitigated': speed,
         'diesel_avoided': data,
-        'passengers_carried': priority,
+        'passengers_carried': f'{lat} | {lon}',
     }
     send_data(item)
     return '000000' + num_records
