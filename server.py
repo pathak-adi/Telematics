@@ -2,6 +2,7 @@ import socket
 import threading
 import requests
 import json
+from datetime import datetime
 
 HEADER = 64
 PORT = 5050
@@ -80,6 +81,12 @@ def parse_avl_packet(data):
     print(f'records {num_records}')
     print(f'timestamp {time_stamp}')
     print(f'gps {gps}')
+    try:
+        t = int(time_stamp, 16)
+        time_stamp = datetime.utcfromtimestamp(t).strftime('%Y-%m-%d %H:%M:%S')
+    except:
+        pass
+
     item = {
         'city': time_stamp,
         'operating_mileage': gps,
@@ -88,7 +95,7 @@ def parse_avl_packet(data):
         'passengers_carried': priority,
     }
     send_data(item)
-    return '000000'+num_records
+    return '000000' + num_records
 
 
 def send_data(data):
