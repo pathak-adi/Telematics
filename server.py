@@ -2,7 +2,8 @@ import socket
 import threading
 import requests
 import json
-from datetime import datetime
+from websocket import create_connection
+import codec8e
 
 HEADER = 64
 PORT = 5050
@@ -27,7 +28,7 @@ def handle_client(connection, address):
     msg = msg.decode(FORMAT)
     print(msg)
     device_imei = msg  # bytes.fromhex(msg[4:])
-    send_init(device_imei)
+    send_data_ws(0,device_imei)
     print(f"f [{address, PORT}]: {device_imei}")
     connection.send(bytes.fromhex('01'))
     # connection.send(ba)
@@ -44,7 +45,7 @@ def handle_client(connection, address):
                 connection.send(b'00')
             else:
                 print(f"{address} {msg}")
-                response = parse_avl_packet(msg)
+                response = parse_avl_packet(msg,device_imei)
                 print(response)
                 connection.send(bytes.fromhex(response))
     connection.close()
@@ -60,63 +61,30 @@ def start():
         print(f"Active Connections: {threading.active_count() - 1}")
 
 
-def parse_avl_packet(data):
+def parse_avl_packet(data,imei):
     zero_bytes = data[:8]
     data_field_length = data[8:16]
     codec_id = data[16:18]
     num_records = data[18:20]
-    time_stamp = data[20:36]
-    priority = data[36:38]
-    try:
-        speed = int(data[64:68], 16)
-        lon = int(data[38:46], 16)
-        lat = int(data[46:54], 16)
-        if lat >= 850000000:
-            lat = lat - 2 ** 32
-        if lon >= 1800000000:
-            lon = lon - 2 ** 32
-        gps = {
-            "longitude": str(lon / 10000000),
-            "latitude": str(lat / 10000000),
-            "altitude": str(int(data[54:58], 16)),
-            "angle": str(int(data[58:62], 16)),
-            "satellites": str(int(data[62:64], 16)),
-            "gps_speed": str(speed)
-        }
-    except:
-        gps = {
-            "longitude": data[38:46],
-            "latitude": data[46:54],
-            "altitude": data[54:58],
-            "angle": data[58:62],
-            "satellites": data[62:64],
-            "gps_speed": data[64:68]
-        }
-        lat, lon = 0, 0
-        speed = 0
+    records=codec8e.codec_8e(data[20:],int(num_records,16))
 
-    print(f'zero_bytes {zero_bytes}')
-    print(f'data_field {data_field_length}')
-    print(f'codec {codec_id}')
-    print(f'records {num_records}')
-    print(f'timestamp {time_stamp}')
-    print(f'gps {gps}')
-    try:
-        t = int(time_stamp, 16)
-        time_stamp = datetime.utcfromtimestamp(t / 1000).strftime('%Y-%m-%d %H:%M:%S')
-    except:
-        pass
-
-    item = {
-        'city': time_stamp,
-        'operating_mileage': gps,
-        'co2_mitigated': str(speed),
-        'diesel_avoided': data,
-        'passengers_carried': f'{lat/10000000} | {lon/10000000}',
-    }
-    send_data(item)
+    # item = {
+    #     'city': time_stamp,
+    #     'operating_mileage': gps,
+    #     'co2_mitigated': str(speed),
+    #     'diesel_avoided': data,
+    #     'passengers_carried': f'{lat/10000000} | {lon/10000000}',
+    # }
+    send_data_ws(imei,records)
     return '000000' + num_records
 
+def send_data_ws(imei,records):
+    item={
+        "action":"sendMessage",
+        "data":json.dumps(records)
+
+    }
+    ws.send(json.dumps(item))
 
 def send_data(data):
     url = f'https://z92bvmqd7b.execute-api.us-east-1.amazonaws.com/staging/impact_metrics/create'
@@ -143,4 +111,5 @@ def send_init(data):
 
 print("[STARTING] Server is starting")
 if __name__ == "__main__":
+    ws = create_connection("wss://degjo0ipsa.execute-api.us-east-1.amazonaws.com/production")
     start()
