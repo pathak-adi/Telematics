@@ -296,6 +296,7 @@ def codec_8e(data, num_records):
 def avl_id(id):
     try:
         resp = avl[id]
+        resp = f'{resp}_{id}'
     except:
         resp = id
     return resp
