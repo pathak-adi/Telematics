@@ -112,7 +112,7 @@ def parse_avl_packet(data):
         'operating_mileage': gps,
         'co2_mitigated': str(speed),
         'diesel_avoided': data,
-        'passengers_carried': f'{lat/1000} | {lon/1000}',
+        'passengers_carried': f'{lat/10000000} | {lon/10000000}',
     }
     send_data(item)
     return '000000' + num_records
