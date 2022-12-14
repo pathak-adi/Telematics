@@ -28,7 +28,7 @@ def handle_client(connection, address):
     msg = msg.decode(FORMAT)
     print(msg)
     device_imei = msg  # bytes.fromhex(msg[4:])
-    send_data_ws(0,device_imei)
+    send_data_ws(0, device_imei)
     print(f"f [{address, PORT}]: {device_imei}")
     connection.send(bytes.fromhex('01'))
     # connection.send(ba)
@@ -45,7 +45,7 @@ def handle_client(connection, address):
                 connection.send(b'00')
             else:
                 print(f"{address} {msg}")
-                response = parse_avl_packet(msg,device_imei)
+                response = parse_avl_packet(msg, device_imei)
                 print(response)
                 connection.send(bytes.fromhex(response))
     connection.close()
@@ -61,30 +61,39 @@ def start():
         print(f"Active Connections: {threading.active_count() - 1}")
 
 
-def parse_avl_packet(data,imei):
-    zero_bytes = data[:8]
-    data_field_length = data[8:16]
-    codec_id = data[16:18]
-    num_records = data[18:20]
-    records=codec8e.codec_8e(data[20:],int(num_records,16))
+def parse_avl_packet(data, imei):
+    try:
+        zero_bytes = data[:8]
+        data_field_length = data[8:16]
+        codec_id = data[16:18]
+        num_records = data[18:20]
+        records = codec8e.codec_8e(data[20:], int(num_records, 16))
+        timestamp=records[0]["timestamp"]
+    except:
+        records = ['Error']
+        num_records = 0
+        timestamp=0
 
-    # item = {
-    #     'city': time_stamp,
-    #     'operating_mileage': gps,
-    #     'co2_mitigated': str(speed),
-    #     'diesel_avoided': data,
-    #     'passengers_carried': f'{lat/10000000} | {lon/10000000}',
-    # }
-    send_data_ws(imei,records)
+    item = {
+        'city': timestamp,
+        'operating_mileage': str(data),
+        'co2_mitigated': 'None',
+        'diesel_avoided': 'None',
+        'passengers_carried': 'None',
+    }
+    send_data_ws(imei, records)
+    send_data(item)
     return '000000' + num_records
 
-def send_data_ws(imei,records):
-    item={
-        "action":"sendMessage",
-        "data":json.dumps(records)
+
+def send_data_ws(imei, records):
+    item = {
+        "action": "sendMessage",
+        "data": json.dumps(records)
 
     }
     ws.send(json.dumps(item))
+
 
 def send_data(data):
     url = f'https://z92bvmqd7b.execute-api.us-east-1.amazonaws.com/staging/impact_metrics/create'
