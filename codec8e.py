@@ -188,7 +188,6 @@ def codec_8e(data, num_records):
     nx = 0
     records = []
     for nr in range(num_records):
-        print(nr)
         time_stamp = data[0:16]
         t = int(time_stamp, 16)
         time_stamp = datetime.utcfromtimestamp(t / 1000).strftime('%Y-%m-%d %H:%M:%S')
@@ -236,8 +235,9 @@ def codec_8e(data, num_records):
             n += 4
             n_value_1 = data[n:n + 2]
             n += 2
-            avl_id_1_byte.append(avl_id(int(n_id_1, 16)))
-            avl_id_1_value.append(int(n_value_1, 16))
+            _id, val = avl_id(n_id_1, n_value_1)
+            avl_id_1_byte.append(_id)
+            avl_id_1_value.append(val)
 
         num_byte_2 = int(data[n:n + 4], 16)  # number of properties of length 2 bytes
         n += 4
@@ -246,8 +246,9 @@ def codec_8e(data, num_records):
             n += 4
             n_value_2 = data[n:n + 4]
             n += 4
-            avl_id_2_byte.append(avl_id(int(n_id_2, 16)))
-            avl_id_2_value.append(int(n_value_2, 16))
+            _id, val = avl_id(n_id_2, n_value_2)
+            avl_id_2_byte.append(_id)
+            avl_id_2_value.append(val)
 
         num_byte_4 = int(data[n:n + 4], 16)  # number of properties of length 4 bytes
         n += 4
@@ -256,8 +257,9 @@ def codec_8e(data, num_records):
             n += 4
             n_value_4 = data[n:n + 8]
             n += 8
-            avl_id_4_byte.append(avl_id(int(n_id_4, 16)))
-            avl_id_4_value.append(int(n_value_4, 16))
+            _id, val = avl_id(n_id_4, n_value_4)
+            avl_id_4_byte.append(_id)
+            avl_id_4_value.append(val)
 
         num_byte_8 = int(data[n:n + 4], 16)  # number of properties of length 8 bytes
         n += 4
@@ -266,8 +268,9 @@ def codec_8e(data, num_records):
             n += 4
             n_value_8 = data[n:n + 16]
             n += 16
-            avl_id_8_byte.append(avl_id(int(n_id_8, 16)))
-            avl_id_8_value.append(int(n_value_8, 16))
+            _id, val = avl_id(n_id_8, n_value_8)
+            avl_id_8_byte.append(_id)
+            avl_id_8_value.append(val)
 
         num_byte_x = int(data[n:n + 4], 16)  # number of properties of length x bytes
         n += 4
@@ -278,8 +281,10 @@ def codec_8e(data, num_records):
             n += 4
             n_value_x = data[n:(n + (n_id_len * 2))]
             n += (n_id_len * 2)
-            avl_id_x_byte.append(avl_id(int(n_id_x, 16)))
-            avl_id_x_value.append(int(n_value_x, 16))
+
+            _id, val = avl_id(n_id_x, n_value_x)
+            avl_id_x_byte.append(_id)
+            avl_id_x_value.append(val)
         data = data[n:]
         nx += n
         avl_ids = avl_id_1_byte + avl_id_2_byte + avl_id_4_byte + avl_id_8_byte + avl_id_x_byte
@@ -288,18 +293,27 @@ def codec_8e(data, num_records):
 
         record = record | gps
         records.append(record)
-        print(records)
-
     return records
 
 
-def avl_id(id):
+def avl_id(_id, value):
+    _id = int(_id, 16)
+    val = int(value, 16)
     try:
-        resp = avl[id]
-        resp = f'{resp}_{id}'
+        resp = avl[_id]
+        _id = f'{resp}_{_id}'
+        _id = _id
     except:
-        resp = id
-    return resp
+        _id = _id
+
+    if _id == 149:
+        _id="SOC"
+        val = int(value[-2:], 16)
+    elif _id == 152:
+        _id="High Resolution Total Vehicle Distance"
+        val = int(value[-6:], 16)*5/1000
+
+    return _id, val
 
 
 # data="00000000000001868e" \
