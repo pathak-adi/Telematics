@@ -82,7 +82,7 @@ def parse_avl_packet(data, imei):
         'passengers_carried': 'None',
     }
     send_data_ws(imei, records)
-    send_data(item)
+    # send_data(item)
     return '000000' + num_records
 
 
