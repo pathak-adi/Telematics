@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 avl = {239: 'Ignition',
        240: 'Movement',
@@ -190,7 +190,8 @@ def codec_8e(data, num_records):
     for nr in range(num_records):
         time_stamp = data[0:16]
         t = int(time_stamp, 16)
-        time_stamp = datetime.utcfromtimestamp(t / 1000).strftime('%Y-%m-%d %H:%M:%S')
+        time_stamp = datetime.utcfromtimestamp(t / 1000)
+        time_stamp=time_stamp.replace(tzinfo=timezone.utc).strftime('%Y-%m-%d %H:%M:%S %Z')
         priority = data[16:18]
         lon = int(data[18:26], 16)
         lat = int(data[26:34], 16)
@@ -312,6 +313,14 @@ def avl_id(_id, value):
     elif _id == 152:
         _id="High Resolution Total Vehicle Distance"
         val = int(value[-6:], 16)*5/1000
+    elif _id == 154:
+        _id="Voltage"
+        print(value)
+        val = int(value[-6:], 16)*0.1
+    elif _id == 380:
+        _id="Current"
+        print(value)
+        val = int(value[-4:], 16)*0.1 - 1000
 
     return _id, val
 

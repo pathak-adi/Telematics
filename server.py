@@ -4,6 +4,7 @@ import requests
 import json
 from websocket import create_connection
 import codec8e
+import pandas as pd
 
 HEADER = 64
 PORT = 5050
@@ -12,6 +13,7 @@ FORMAT = 'utf-8'
 ADDR = (SERVER, PORT)
 DISCONNECT_MESSAGE = "!DISCONNECT"
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
 try:
     server.bind(ADDR)
 except:
@@ -24,7 +26,6 @@ def handle_client(connection, address):
     print(f" New Connection: {address} has connected")
     connected = True
     msg = connection.recv(1024)
-    print(msg)
     msg = msg.decode(FORMAT)
     print(msg)
     device_imei = msg  # bytes.fromhex(msg[4:])
@@ -36,7 +37,6 @@ def handle_client(connection, address):
         msg = connection.recv(1024).hex()
         if len(msg) > 0:
             # msg = connection.recv(1024).decode(FORMAT)
-            print(msg)
             msg = str(msg)
 
             if msg == DISCONNECT_MESSAGE:
@@ -46,7 +46,6 @@ def handle_client(connection, address):
             else:
                 print(f"{address} {msg}")
                 response = parse_avl_packet(msg, device_imei)
-                print(response)
                 connection.send(bytes.fromhex(response))
     connection.close()
 
@@ -82,17 +81,35 @@ def parse_avl_packet(data, imei):
         'passengers_carried': 'None',
     }
     send_data_ws(imei, records)
+    save_data(imei,records)
     # send_data(item)
     return '000000' + num_records
 
+def reconnect():
+    ws = create_connection("wss://degjo0ipsa.execute-api.us-east-1.amazonaws.com/production")
+
+def save_data(imei,records):
+    pass
+
 
 def send_data_ws(imei, records):
-    item = {
-        "action": "sendMessage",
-        "data": json.dumps(records)
+    try:
+        item = {
+            "action": "sendMessage",
+            "data": json.dumps(records)
 
-    }
-    ws.send(json.dumps(item))
+        }
+        ws.send(json.dumps(item))
+    except:
+        reconnect()
+        item = {
+            "action": "sendMessage",
+            "data": json.dumps(records)
+
+        }
+        ws.send(json.dumps(item))
+
+    return 0
 
 
 def send_data(data):
@@ -119,6 +136,8 @@ def send_init(data):
 
 
 print("[STARTING] Server is starting")
+
+
 if __name__ == "__main__":
     ws = create_connection("wss://degjo0ipsa.execute-api.us-east-1.amazonaws.com/production")
     start()
