@@ -191,7 +191,7 @@ def codec_8e(data, num_records):
         time_stamp = data[0:16]
         t = int(time_stamp, 16)
         time_stamp = datetime.utcfromtimestamp(t / 1000)
-        time_stamp=time_stamp.replace(tzinfo=timezone.utc).strftime('%Y-%m-%d %H:%M:%S %Z')
+        time_stamp=time_stamp.replace(tzinfo=timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
         priority = data[16:18]
         lon = int(data[18:26], 16)
         lat = int(data[26:34], 16)
