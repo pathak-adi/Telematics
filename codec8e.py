@@ -187,11 +187,13 @@ def codec_8e(data, num_records):
     n_max = len(data)
     nx = 0
     records = []
+    time_stamp_unix=0
     for nr in range(num_records):
         time_stamp = data[0:16]
         t = int(time_stamp, 16)
         time_stamp = datetime.utcfromtimestamp(t / 1000)
-        time_stamp=time_stamp.replace(tzinfo=timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
+        time_stamp_unix = t
+        time_stamp = time_stamp.replace(tzinfo=timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
         priority = data[16:18]
         lon = int(data[18:26], 16)
         lat = int(data[26:34], 16)
@@ -294,7 +296,7 @@ def codec_8e(data, num_records):
 
         record = record | gps
         records.append(record)
-    return records
+    return records, time_stamp_unix
 
 
 def avl_id(_id, value):
@@ -308,21 +310,21 @@ def avl_id(_id, value):
         _id = _id
 
     if _id == 149:
-        _id="SOC"
+        _id = "SOC"
         val = int(value[-2:], 16)
     elif _id == 152:
-        _id="High Resolution Total Vehicle Distance"
-        val = int(value[-6:], 16)*5/1000
+        _id = "High Resolution Total Vehicle Distance"
+        val = int(value[-6:], 16) * 5 / 1000
     elif _id == 154:
-        _id="Voltage"
+        _id = "Voltage"
         print(value)
-        val = int(value[-6:], 16)*0.1
+        val = int(value[-6:], 16) * 0.1
     elif _id == 380:
-        _id="Current"
+        _id = "Current"
         print(value)
-        val = int(value[-4:], 16)*0.1 - 1000
+        val = int(value[-4:], 16) * 0.1 - 1000
 
-    return _id, val
+    return str(_id), str(val)
 
 
 # data="00000000000001868e" \

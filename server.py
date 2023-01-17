@@ -66,30 +66,31 @@ def parse_avl_packet(data, imei):
         data_field_length = data[8:16]
         codec_id = data[16:18]
         num_records = data[18:20]
-        records = codec8e.codec_8e(data[20:], int(num_records, 16))
-        timestamp=records[0]["timestamp"]
+        records, device_timestamp = codec8e.codec_8e(data[20:], int(num_records, 16))
+        save_data(imei, records, device_timestamp)
     except:
         records = ['Error']
         num_records = 0
-        timestamp=0
 
-    item = {
-        'city': timestamp,
-        'operating_mileage': str(data),
-        'co2_mitigated': 'None',
-        'diesel_avoided': 'None',
-        'passengers_carried': 'None',
-    }
     send_data_ws(imei, records)
-    save_data(imei,records)
     # send_data(item)
     return '000000' + num_records
+
 
 def reconnect():
     ws = create_connection("wss://degjo0ipsa.execute-api.us-east-1.amazonaws.com/production")
 
-def save_data(imei,records):
-    pass
+
+def save_data(imei, records,timestamp):
+    url = 'https://94bup2tdy0.execute-api.us-east-1.amazonaws.com/production/data/append'
+    body = {
+        "datetime": timestamp,
+        "imei": f"FMB640_{imei}",
+        "data": records
+    }
+
+    resp = requests.post(url, json.dumps(body))
+    return resp
 
 
 def send_data_ws(imei, records):
@@ -101,13 +102,8 @@ def send_data_ws(imei, records):
         }
         ws.send(json.dumps(item))
     except:
+        ws.close()
         reconnect()
-        item = {
-            "action": "sendMessage",
-            "data": json.dumps(records)
-
-        }
-        ws.send(json.dumps(item))
 
     return 0
 
@@ -136,7 +132,6 @@ def send_init(data):
 
 
 print("[STARTING] Server is starting")
-
 
 if __name__ == "__main__":
     ws = create_connection("wss://degjo0ipsa.execute-api.us-east-1.amazonaws.com/production")
