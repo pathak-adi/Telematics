@@ -26,7 +26,9 @@ except:
 
 def handle_client(connection, address):
     print(f" New Connection: {address} has connected")
+    i=0
     try:
+        print(i)
         connected = True
         msg = connection.recv(1024)
         msg = msg.decode(FORMAT)
@@ -35,6 +37,9 @@ def handle_client(connection, address):
         device_imei = msg  # bytes.fromhex(msg[4:])
         send_data_ws(0, device_imei)
         print(f"f [{address, PORT}]: {device_imei}")
+        connection.close()
+        connected = False
+        i=i+1
     except:
         # connection.send(bytes.fromhex('01'))
         print('connection message failed')
