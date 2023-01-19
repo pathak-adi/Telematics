@@ -25,7 +25,7 @@ except:
 def handle_client(connection, address):
     print(f" New Connection: {address} has connected")
     connected = True
-    msg = connection.recv(1024)
+    msg = connection.recv(512)
     msg = msg.decode(FORMAT)
     print(msg)
     device_imei = msg  # bytes.fromhex(msg[4:])
