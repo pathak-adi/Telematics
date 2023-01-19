@@ -1,5 +1,7 @@
 import socket
 import threading
+import time
+
 import requests
 import json
 from websocket import create_connection
@@ -34,9 +36,17 @@ def handle_client(connection, address):
         send_data_ws(0, device_imei)
         print(f"f [{address, PORT}]: {device_imei}")
     except:
-        connection.send(bytes.fromhex('01'))
+        # connection.send(bytes.fromhex('01'))
         print('connection message failed')
-        connected = False
+        time.sleep(3)
+        connected = True
+        msg = connection.recv(1024)
+        msg = msg.decode(FORMAT)
+        print(msg)
+        connection.send(bytes.fromhex('01'))
+        device_imei = msg  # bytes.fromhex(msg[4:])
+        send_data_ws(0, device_imei)
+        print(f"f [{address, PORT}]: {device_imei}")
 
 
     # connection.send(ba)
