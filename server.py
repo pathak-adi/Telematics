@@ -24,14 +24,21 @@ except:
 
 def handle_client(connection, address):
     print(f" New Connection: {address} has connected")
-    connected = True
-    msg = connection.recv(512)
-    msg = msg.decode(FORMAT)
-    print(msg)
-    device_imei = msg  # bytes.fromhex(msg[4:])
-    send_data_ws(0, device_imei)
-    print(f"f [{address, PORT}]: {device_imei}")
-    connection.send(bytes.fromhex('01'))
+    try:
+        connected = True
+        msg = connection.recv(1024)
+        msg = msg.decode(FORMAT)
+        print(msg)
+        connection.send(bytes.fromhex('01'))
+        device_imei = msg  # bytes.fromhex(msg[4:])
+        send_data_ws(0, device_imei)
+        print(f"f [{address, PORT}]: {device_imei}")
+    except:
+        connection.send(bytes.fromhex('01'))
+        print('connection message failed')
+        connected = False
+
+
     # connection.send(ba)
     while connected:
         msg = connection.recv(1024).hex()
