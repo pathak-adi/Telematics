@@ -45,8 +45,11 @@ def handle_client(connection, address):
                 connection.send(b'00')
             else:
                 print(f"{address} {msg}")
-                response = parse_avl_packet(msg, device_imei)
-                connection.send(bytes.fromhex(response))
+                try:
+                    response = parse_avl_packet(msg, device_imei)
+                    connection.send(bytes.fromhex(response))
+                except:
+                    connected = False
     connection.close()
 
 
@@ -67,7 +70,7 @@ def parse_avl_packet(data, imei):
         codec_id = data[16:18]
         num_records = data[18:20]
         records, device_timestamp = codec8e.codec_8e(data[20:], int(num_records, 16))
-        save_data(imei, records, device_timestamp)
+        #save_data(imei, records, device_timestamp)
     except:
         records = ['Error']
         num_records = 0
@@ -81,11 +84,11 @@ def reconnect():
     ws = create_connection("wss://degjo0ipsa.execute-api.us-east-1.amazonaws.com/production")
 
 
-def save_data(imei, records,timestamp):
+def save_data(imei, records, timestamp):
     url = 'https://94bup2tdy0.execute-api.us-east-1.amazonaws.com/production/data/append'
     body = {
         "datetime": timestamp,
-        "imei": f"FMB640_{imei}",
+        "imei": f"FMB640_{imei[3:]}",
         "data": records
     }
 
@@ -97,7 +100,7 @@ def send_data_ws(imei, records):
     try:
         item = {
             "action": "sendMessage",
-            "data": json.dumps(records)
+            "data": json.dumps({"device":imei,"data":records})
 
         }
         ws.send(json.dumps(item))
